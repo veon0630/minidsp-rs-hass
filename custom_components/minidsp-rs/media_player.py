@@ -22,7 +22,6 @@ _SOURCE_MAP = {
     "TOSLINK": "Toslink",
     "SPDIF": "Spdif",
     "USB": "Usb",
-    "Bluetooth": "Bluetooth",
     "HDMI": "Hdmi",
 }
 
