@@ -123,8 +123,8 @@ class MiniDSPAPI:
                         elif msg.type == aiohttp.WSMsgType.ERROR:
                             _LOGGER.debug("Websocket error: %s", ws.exception())
                             break
-            except (aiohttp.ClientError, asyncio.TimeoutError) as err:
-                _LOGGER.warning("Websocket connection failed: %s", err)
+            except Exception as err:
+                _LOGGER.warning("Websocket connection failed or threw exception: %s", err)
 
             await self._dispatch_event({"type": "connection_lost"})
 
