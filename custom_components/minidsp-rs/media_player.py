@@ -24,6 +24,7 @@ _SOURCE_MAP = {
     "SPDIF": "Spdif",
     "USB": "Usb",
     "Bluetooth": "Bluetooth",
+    "HDMI": "Hdmi",
 }
 
 # Preset map copied from select.py

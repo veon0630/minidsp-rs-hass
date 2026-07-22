@@ -19,6 +19,7 @@ _SOURCE_MAP = {
     "SPDIF": "Spdif",
     "USB": "Usb",
     "Bluetooth": "Bluetooth",
+    "HDMI": "Hdmi",
 }
 
 _PRESET_MAP = {
