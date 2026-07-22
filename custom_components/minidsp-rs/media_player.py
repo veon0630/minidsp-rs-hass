@@ -19,7 +19,6 @@ _LOGGER = logging.getLogger(__name__)
 
 # Map friendly labels (as shown to user) to API values
 _SOURCE_MAP = {
-    "Analog": "Analog",
     "TOSLINK": "Toslink",
     "SPDIF": "Spdif",
     "USB": "Usb",
