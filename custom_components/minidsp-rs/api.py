@@ -126,6 +126,8 @@ class MiniDSPAPI:
             except (aiohttp.ClientError, asyncio.TimeoutError) as err:
                 _LOGGER.warning("Websocket connection failed: %s", err)
 
+            await self._dispatch_event({"type": "connection_lost"})
+
             if self._stop_event.is_set():
                 break
 

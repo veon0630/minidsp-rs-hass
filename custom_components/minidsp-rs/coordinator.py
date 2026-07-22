@@ -43,6 +43,10 @@ class MiniDSPCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         """Start listening to websocket events."""
 
         async def _levels_callback(event: dict[str, Any]):
+            if event.get("type") == "connection_lost":
+                self.async_set_update_error(UpdateFailed("Websocket disconnected"))
+                return
+            
             # Update only levels fields without re-fetching everything
             current = dict(self.data or {})
             updated = False
