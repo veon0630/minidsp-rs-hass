@@ -131,9 +131,9 @@ class MiniDSPAPI:
             if self._stop_event.is_set():
                 break
 
-            # Reconnect with exponential backoff
-            await asyncio.sleep(backoff)
-            backoff = min(backoff * 2.0, 60.0)
+            # Reconnect with a fixed short delay like minidsp-api.py for fast recovery
+            await asyncio.sleep(3.0)
+            backoff = 3.0
 
         _LOGGER.debug("MiniDSP websocket listener stopped")
 
