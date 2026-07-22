@@ -14,7 +14,7 @@ from .coordinator import MiniDSPCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS: list[str] = ["media_player", "sensor", "switch", "number"]
+PLATFORMS: list[str] = ["media_player", "select", "switch", "number"]
 
 
 async def async_setup(hass: HomeAssistant, config: dict):  # type: ignore[arg-type]

@@ -119,9 +119,9 @@ class MiniDSPMediaPlayer(CoordinatorEntity[MiniDSPCoordinator], MediaPlayerEntit
     # ------------------------------------------------------------
 
     async def async_set_volume_level(self, volume: float):  # type: ignore[override]
-        db_gain = self._level_to_db(volume)
-        await self.coordinator._api.async_set_volume(db_gain)
-        await self.coordinator.async_request_refresh()
+        gain = self._level_to_db(volume)
+        self.coordinator.async_update_master_optimistic("volume", gain)
+        await self.coordinator._api.async_set_volume(gain)
 
     async def async_volume_up(self):  # type: ignore[override]
         if self.volume_level is None:
@@ -134,20 +134,20 @@ class MiniDSPMediaPlayer(CoordinatorEntity[MiniDSPCoordinator], MediaPlayerEntit
         await self.async_set_volume_level(max(0.0, self.volume_level - 0.05))
 
     async def async_mute_volume(self, mute: bool):  # type: ignore[override]
+        self.coordinator.async_update_master_optimistic("mute", mute)
         await self.coordinator._api.async_set_mute(mute)
-        await self.coordinator.async_request_refresh()
 
     async def async_select_source(self, source: str):  # type: ignore[override]
         api_val = _SOURCE_MAP.get(source, source)
+        self.coordinator.async_update_master_optimistic("source", api_val)
         await self.coordinator._api.async_set_source(api_val)
-        await self.coordinator.async_request_refresh()
 
     async def async_select_sound_mode(self, sound_mode: str):  # type: ignore[override]
-        if sound_mode not in _PRESET_MAP:
-            _LOGGER.warning("Unknown preset option %s", sound_mode)
-            return
-        await self.coordinator._api.async_set_preset(_PRESET_MAP[sound_mode])
-        await self.coordinator.async_request_refresh()
+        # sound_mode corresponds to preset in our map
+        api_val = _PRESET_MAP.get(sound_mode)
+        if api_val is not None:
+            self.coordinator.async_update_master_optimistic("preset", api_val)
+            await self.coordinator._api.async_set_preset(api_val)
 
     # ------------------------------------------------------------
     @property

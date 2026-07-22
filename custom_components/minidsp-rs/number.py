@@ -53,6 +53,36 @@ class MiniDSPOutputGain(CoordinatorEntity[MiniDSPCoordinator], NumberEntity):
         }
 
 
+class MiniDSPMasterVolume(CoordinatorEntity[MiniDSPCoordinator], NumberEntity):
+    """Master Volume control (-127.5 to 0.0 dB)."""
+
+    _attr_has_entity_name = True
+    _attr_icon = "mdi:volume-high"
+    _attr_native_min_value = -127.5
+    _attr_native_max_value = 0.0
+    _attr_native_step = 0.5
+    _attr_native_unit_of_measurement = "dB"
+
+    def __init__(self, coordinator: MiniDSPCoordinator):
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{coordinator.address}_master_volume"
+        self._attr_name = "Master Volume"
+
+    @property
+    def native_value(self):
+        return (self.coordinator.data or {}).get("master", {}).get("volume")
+
+    async def async_set_native_value(self, value: float):
+        self.coordinator.async_update_master_optimistic("volume", float(value))
+        await self.coordinator._api.async_set_volume(float(value))
+
+    @property
+    def device_info(self):
+        return {
+            "identifiers": {(DOMAIN, self.coordinator.address)},
+            "name": self.coordinator.name,
+        }
+
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities
 ):
@@ -62,13 +92,14 @@ async def async_setup_entry(
         _LOGGER.error("Coordinator not found during number platform setup")
         return
 
-    # Determine number of output channels from output_levels
+    # Determine how many output channels we have
     data = coordinator.data or {}
-    output_levels = data.get("output_levels", [])
-    num_outputs = len(output_levels)
-
-    entities = []
-    for i in range(num_outputs):
-        entities.append(MiniDSPOutputGain(coordinator, i))
+    outputs = data.get("outputs", [])
+    
+    entities = [MiniDSPMasterVolume(coordinator)]
+    for output in outputs:
+        idx = output.get("index")
+        if idx is not None:
+            entities.append(MiniDSPOutputGain(coordinator, idx))
 
     async_add_entities(entities)

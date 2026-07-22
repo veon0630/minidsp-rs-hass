@@ -105,6 +105,20 @@ class MiniDSPCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             self._unsubscribe_ws = None
         await self._api.async_disconnect()
 
+    def async_update_master_optimistic(self, key: str, value: Any) -> None:
+        """Optimistically update the master status locally to prevent UI jitter."""
+        if self.data is None:
+            self.data = {}
+        if "master" not in self.data:
+            self.data["master"] = {}
+        
+        # Update the local cache
+        self.data["master"][key] = value
+        
+        # Trigger an immediate state update to Home Assistant
+        self.async_set_updated_data(self.data)
+
+
     def _rounded_levels(self, data: dict[str, Any]) -> dict[str, Any]:
         def _round_val(val: Any):
             return int(round(val)) if isinstance(val, (int, float)) else val
