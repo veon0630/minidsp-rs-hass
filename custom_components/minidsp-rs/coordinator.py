@@ -97,8 +97,8 @@ class MiniDSPCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                             current[key] = new_list
                             updated = True
 
-            if updated:
-                # Push incremental update to listeners
+            if updated or not self.last_update_success:
+                # Push incremental update to listeners (and clear any error state if we just reconnected)
                 self.async_set_updated_data(current)
 
         self._unsubscribe_ws = await self._api.async_subscribe_levels(_levels_callback)
