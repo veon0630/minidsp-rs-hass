@@ -104,7 +104,7 @@ class MiniDSPAPI:
         while not self._stop_event.is_set():
             try:
                 _LOGGER.debug("Connecting to MiniDSP websocket at %s", ws_url)
-                async with self._session.ws_connect(ws_url) as ws:
+                async with self._session.ws_connect(ws_url, heartbeat=30) as ws:
                     backoff = 1.0  # Reset backoff after successful connect
                     async for msg in ws:
                         if msg.type == aiohttp.WSMsgType.TEXT:
@@ -126,13 +126,15 @@ class MiniDSPAPI:
             except Exception as err:
                 _LOGGER.warning("Websocket connection failed or threw exception: %s", err)
 
-            await self._dispatch_event({"type": "connection_lost"})
+            # Delay UI error state until we've failed to reconnect a few times (backoff > 2.0s).
+            # This completely masks short network jitters ("flapping") from the user.
+            if backoff > 2.0:
+                await self._dispatch_event({"type": "connection_lost"})
 
             if self._stop_event.is_set():
                 break
 
             # Reconnect with a capped exponential backoff (max 10 seconds)
-            # This ensures HA recovers within 10s of wake up, without spamming when offline all day
             await asyncio.sleep(backoff)
             backoff = min(backoff * 1.5, 10.0)
 
